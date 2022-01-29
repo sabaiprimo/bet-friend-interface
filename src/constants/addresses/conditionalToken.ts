@@ -2,5 +2,5 @@ import { buildAddresses } from "..";
 import { ChainId } from "../chains";
 
 export const CONDITIONAL_TOKEN_ADDRESS = buildAddresses({
-  [ChainId.Ropsten]: "0x45c74dc009948Fe875bb552D1011c3b0b42ea046",
+  [ChainId.Ropsten]: "0x5611e569E193b40d9A6c02207d87c022116A8216",
 });

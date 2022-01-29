@@ -17,12 +17,20 @@ export const useConditionalToken = () => {
     signerOrProvider: provider,
   });
 
-  const balanceOf = async (account: string, positionId: number) => {
-    return await caller.balanceOf(account, positionId);
+  const balanceOf = async (account: string, positionId: string) => {
+    console.log("account: ", account);
+    console.log("positionId: ", positionId);
+    try {
+      const data = await caller.balanceOf(account, positionId);
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getOutcomeSlotCount = async (id: string) => {
-    return await caller.getOutcomeSlotCount(id);
+    return caller.getOutcomeSlotCount(id);
   };
 
   const getCollectionId = async (
@@ -30,29 +38,25 @@ export const useConditionalToken = () => {
     conditionId: string,
     indexSet: number[]
   ) => {
-    return await caller.getCollectionId(
-      parentCollectionId,
-      conditionId,
-      indexSet
-    );
+    return caller.getCollectionId(parentCollectionId, conditionId, indexSet);
   };
 
   const payoutDenominator = async (conditionId: string) => {
-    return await caller.payoutDenominator(conditionId);
+    return caller.payoutDenominator(conditionId);
   };
 
   const payoutNumerators = async (
     conditionId: string,
     outcomeIndex: number
   ) => {
-    return await caller.payoutNumerators(conditionId, outcomeIndex);
+    return caller.payoutNumerators(conditionId, outcomeIndex);
   };
 
   const isApprovedForAll = async (
     account: string,
     lmsrMarketMakerAddress: string
   ) => {
-    return await caller.isApprovedForAll(account, lmsrMarketMakerAddress);
+    return caller.isApprovedForAll(account, lmsrMarketMakerAddress);
   };
 
   const setApprovalForAll = async (
@@ -60,11 +64,10 @@ export const useConditionalToken = () => {
     approved: boolean,
     from: string
   ) => {
-    return await writer.conditionalTokens.setApprovalForAll(
-      lmsrMarketMakerAddress,
-      approved,
-      { from }
-    );
+    return writer.setApprovalForAll(lmsrMarketMakerAddress, approved, {
+      from,
+      gasLimit: 500000,
+    });
   };
 
   const reportPayouts = async (
@@ -72,7 +75,10 @@ export const useConditionalToken = () => {
     payouts: number[],
     from: string
   ) => {
-    return await writer.reportPayouts(questionId, payouts, { from });
+    return writer.reportPayouts(questionId, payouts, {
+      from,
+      gasLimit: 500000,
+    });
   };
 
   const redeemPositions = async (
@@ -82,12 +88,12 @@ export const useConditionalToken = () => {
     indexSets: number[],
     from: string
   ) => {
-    return await writer.conditionalTokens.redeemPositions(
+    return writer.conditionalTokens.redeemPositions(
       collateralAddress,
       parentCollectionId,
       marketConditionId,
       indexSets,
-      { from }
+      { from, gasLimit: 500000 }
     );
   };
 

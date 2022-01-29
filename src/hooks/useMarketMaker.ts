@@ -5,6 +5,7 @@ import { useNetwork } from "./useNetwork";
 import { formatBNToString } from "../utils";
 import { MARKET_MAKER_ADDRESS } from "constants/addresses/marketMaker";
 import MarketMakerABI from "../constants/abis/LSMRMarketMakerFactory.json";
+import { BigNumber } from "ethers";
 
 export const useMarketMaker = () => {
   const provider = useProvider();
@@ -18,15 +19,16 @@ export const useMarketMaker = () => {
   });
 
   const getCollateralToken = async () => {
-    return await caller.collateralToken();
+    const data = await caller.collateralToken();
+    return data;
   };
 
   const conditionIds = async (index: number) => {
-    return await caller.conditionIds(index);
+    return caller.conditionIds(index);
   };
 
   const owner = async () => {
-    return await caller.owner();
+    return caller.owner();
   };
 
   const funding = async () => {
@@ -38,10 +40,10 @@ export const useMarketMaker = () => {
   };
 
   const close = async (from: string) => {
-    return writer.close({ from });
+    return writer.close({ from, gasLimit: 500000 });
   };
 
-  const calcNetCost = async (outcomeTokenAmounts: number[]) => {
+  const calcNetCost = async (outcomeTokenAmounts: BigNumber[]) => {
     return caller.calcNetCost(outcomeTokenAmounts);
   };
 
@@ -50,11 +52,14 @@ export const useMarketMaker = () => {
   };
 
   const trade = async (
-    tradeAmounts: number[],
+    tradeAmounts: BigNumber[],
     collateralLimit: number,
     from: string
   ) => {
-    return writer.trade(tradeAmounts, collateralLimit, { from });
+    return writer.trade(tradeAmounts, collateralLimit, {
+      from,
+      gasLimit: 500000,
+    });
   };
 
   return {

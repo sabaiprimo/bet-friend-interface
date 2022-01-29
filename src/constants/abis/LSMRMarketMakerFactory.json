@@ -1,9 +1,9 @@
 [
   {
+    "anonymous": false,
     "inputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "name": "AMMClosed",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -22,19 +22,39 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
         "indexed": false,
-        "internalType": "address",
-        "name": "clone",
-        "type": "address"
+        "internalType": "uint64",
+        "name": "newFee",
+        "type": "uint64"
       }
     ],
-    "name": "CloneCreated",
+    "name": "AMMFeeChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fees",
+        "type": "uint256"
+      }
+    ],
+    "name": "AMMFeeWithdrawal",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "fundingChange",
+        "type": "int256"
+      }
+    ],
+    "name": "AMMFundingChanged",
     "type": "event"
   },
   {
@@ -43,47 +63,41 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "creator",
+        "name": "transactor",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "contract LMSRMarketMaker",
-        "name": "lmsrMarketMaker",
-        "type": "address"
+        "internalType": "int256[]",
+        "name": "outcomeTokenAmounts",
+        "type": "int256[]"
       },
       {
         "indexed": false,
-        "internalType": "contract ConditionalTokens",
-        "name": "pmSystem",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "contract IERC20",
-        "name": "collateralToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32[]",
-        "name": "conditionIds",
-        "type": "bytes32[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "fee",
-        "type": "uint64"
+        "internalType": "int256",
+        "name": "outcomeTokenNetCost",
+        "type": "int256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "funding",
+        "name": "marketFees",
         "type": "uint256"
       }
     ],
-    "name": "LMSRMarketMakerCreation",
+    "name": "AMMOutcomeTokenTrade",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "AMMPaused",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "AMMResumed",
     "type": "event"
   },
   {
@@ -106,15 +120,108 @@
     "type": "event"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "FEE_RANGE",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "atomicOutcomeSlotCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "outcomeTokenIndex",
+        "type": "uint8"
+      }
+    ],
+    "name": "calcMarginalPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "outcomeTokenCost",
+        "type": "uint256"
+      }
+    ],
+    "name": "calcMarketFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "int256[]",
+        "name": "outcomeTokenAmounts",
+        "type": "int256[]"
+      }
+    ],
+    "name": "calcNetCost",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "netCost",
+        "type": "int256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "consData",
-        "type": "bytes"
+        "internalType": "uint64",
+        "name": "_fee",
+        "type": "uint64"
       }
     ],
-    "name": "cloneConstructor",
+    "name": "changeFee",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -124,42 +231,183 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract ConditionalTokens",
-        "name": "pmSystem",
-        "type": "address"
-      },
+        "internalType": "int256",
+        "name": "fundingChange",
+        "type": "int256"
+      }
+    ],
+    "name": "changeFunding",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "close",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "collateralToken",
+    "outputs": [
       {
         "internalType": "contract IERC20",
-        "name": "collateralToken",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "conditionIds",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "fee",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "funding",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOwner",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_operator",
         "type": "address"
       },
       {
-        "internalType": "bytes32[]",
-        "name": "conditionIds",
-        "type": "bytes32[]"
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       },
       {
-        "internalType": "uint64",
-        "name": "fee",
-        "type": "uint64"
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
       },
       {
-        "internalType": "contract Whitelist",
-        "name": "whitelist",
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "onERC1155BatchReceived",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
         "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "funding",
+        "name": "",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
       }
     ],
-    "name": "createLMSRMarketMaker",
+    "name": "onERC1155Received",
     "outputs": [
       {
-        "internalType": "contract LMSRMarketMaker",
-        "name": "lmsrMarketMaker",
-        "type": "address"
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
       }
     ],
     "payable": false,
@@ -169,16 +417,165 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "implementationMaster",
+    "name": "owner",
     "outputs": [
       {
-        "internalType": "contract LMSRMarketMaker",
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "pause",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "pmSystem",
+    "outputs": [
+      {
+        "internalType": "contract ConditionalTokens",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "resume",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "stage",
+    "outputs": [
+      {
+        "internalType": "enum MarketMaker.Stage",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "int256[]",
+        "name": "outcomeTokenAmounts",
+        "type": "int256[]"
+      },
+      {
+        "internalType": "int256",
+        "name": "collateralLimit",
+        "type": "int256"
+      }
+    ],
+    "name": "trade",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "netCost",
+        "type": "int256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "whitelist",
+    "outputs": [
+      {
+        "internalType": "contract Whitelist",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "withdrawFees",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "fees",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
