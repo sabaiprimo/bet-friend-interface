@@ -18,11 +18,9 @@ export const useConditionalToken = () => {
   });
 
   const balanceOf = async (account: string, positionId: string) => {
-    console.log("account: ", account);
-    console.log("positionId: ", positionId);
     try {
       const data = await caller.balanceOf(account, positionId);
-      console.log(data);
+
       return data;
     } catch (error) {
       console.log(error);

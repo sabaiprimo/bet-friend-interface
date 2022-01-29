@@ -53,13 +53,14 @@ export const useMarketMaker = () => {
 
   const trade = async (
     tradeAmounts: BigNumber[],
-    collateralLimit: number,
-    from: string
+    collateralLimit: BigNumber
   ) => {
-    return writer.trade(tradeAmounts, collateralLimit, {
-      from,
-      gasLimit: 500000,
+    console.log("tradeAmounts: ", tradeAmounts);
+    const data = await writer.trade(tradeAmounts, collateralLimit, {
+      gasLimit: 900000,
     });
+    console.log(data);
+    return data;
   };
 
   return {

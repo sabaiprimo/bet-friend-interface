@@ -73,5 +73,5 @@ const App = (props: MyAppProps) => {
     </CacheProvider>
   );
 };
-
+App.displayName = "App";
 export default App;

@@ -16,8 +16,6 @@ export const getPositionId = (
   collateralToken: string,
   collectionId: string
 ) => {
-  console.log("collateralTOken: ", collateralToken);
-  console.log("collectionId: ", collectionId);
   return Web3.utils.soliditySha3(
     { t: "address", v: collateralToken },
     { t: "bytes32", v: collectionId }

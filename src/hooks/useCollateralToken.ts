@@ -19,11 +19,9 @@ export const useCollateralToken = (erc20Address: string) => {
   });
 
   const balanceOf = async (account: string) => {
-    console.log("account: ", account);
-
     try {
       const data = await caller.balanceOf(account);
-      console.log(data);
+
       return data;
     } catch (error) {
       console.log(error);

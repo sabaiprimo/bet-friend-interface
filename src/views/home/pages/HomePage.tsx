@@ -217,8 +217,19 @@ const Market = () => {
   }, [account?.address]);
 
   const buy = async () => {
+    console.log("--------------------------buy---------------------");
     const formatedAmount = parseEther(selectedAmount);
-
+    const isApproved = await conditionalToken.isApprovedForAll(
+      account?.address ?? ZERO_ADDRESS,
+      marketInfo.lmsrAddress
+    );
+    if (!isApproved) {
+      await conditionalToken.setApprovalForAll(
+        marketInfo.lmsrAddress,
+        true,
+        account?.address ?? ZERO_ADDRESS
+      );
+    }
     // new BigNumber(selectedAmount).multipliedBy(
     //   new BigNumber(Math.pow(10, collateral.decimals)),
     // )
@@ -232,16 +243,16 @@ const Market = () => {
     const cost = await marketMaker.calcNetCost(outcomeTokenAmounts);
 
     const collateralBalance = await collateral.balanceOf(account?.address!);
+
     if (cost.gt(collateralBalance)) {
       await collateral.deposit(account?.address!, formatedAmount);
-      await collateral.approve(marketInfo.lmsrAddress, formatedAmount);
+      await collateral.approve(
+        "0x6E6f31D4AAbF3497c0dEAA8ED0C4B09f57B14079",
+        formatedAmount
+      );
     }
 
-    const tx = await marketMaker.trade(
-      outcomeTokenAmounts,
-      cost,
-      account?.address ?? ZERO_ADDRESS
-    );
+    const tx = await marketMaker.trade(outcomeTokenAmounts, cost);
     console.log({ tx });
 
     await getMarketInfo();
@@ -269,11 +280,7 @@ const Market = () => {
     );
     const profit = (await marketMaker.calcNetCost(outcomeTokenAmounts)).mul(-1);
 
-    const tx = await marketMaker.trade(
-      outcomeTokenAmounts,
-      profit,
-      account?.address || ZERO_ADDRESS
-    );
+    const tx = await marketMaker.trade(outcomeTokenAmounts, profit);
     console.log({ tx });
 
     await getMarketInfo();
@@ -380,7 +387,7 @@ const Market = () => {
     }
 
     const marketData = {
-      lmsrAddress: markets.lmsrAddress,
+      lmsrAddress: "0x6E6f31D4AAbF3497c0dEAA8ED0C4B09f57B14079",
       title: markets.markets[0].title,
       outcomes,
       stage: MarketStage[await marketMaker.stage()],
