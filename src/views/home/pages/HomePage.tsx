@@ -15,7 +15,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { getConditionId, getPositionId } from "utils/market";
 import { useConditionalToken } from "hooks/useConditionalToken";
 import { BigNumber } from "ethers";
-import { useAccount } from "wagmi";
+import { useAccount, useContext } from "wagmi";
 import { ZERO_ADDRESS } from "constants/misc";
 import { TextField } from "@mui/material";
 import { FormControlLabel } from "@mui/material";
@@ -23,6 +23,8 @@ import { formatBNToString } from "utils";
 import { useCollateralToken } from "hooks/useCollateralToken";
 import { parseEther } from "ethers/lib/utils";
 import styled from "@emotion/styled";
+import { Contract } from "@ethersproject/contracts";
+import CollateralTokenABI from "../../../constants/abis/WETH9.json";
 
 type TradingFormProps = {
   isMarketClosed: boolean;
@@ -192,7 +194,9 @@ const Market = () => {
   const [collateralAddr, setCollateralAddr] = useState<string>(ZERO_ADDRESS);
   const marketMaker = useMarketMaker();
   const conditionalToken = useConditionalToken();
-  const collateral = useCollateralToken(collateralAddr);
+  const {
+    state: { connector },
+  } = useContext();
 
   const [{ data: account, error, loading }, disconnect] = useAccount();
 
@@ -217,7 +221,9 @@ const Market = () => {
   }, [account?.address]);
 
   const buy = async () => {
-    console.log("--------------------------buy---------------------");
+    const signer = await connector?.getSigner();
+
+    const collateral = new Contract(collateralAddr, CollateralTokenABI, signer);
     const formatedAmount = parseEther(selectedAmount);
     // new BigNumber(selectedAmount).multipliedBy(
     //   new BigNumber(Math.pow(10, collateral.decimals)),
@@ -232,8 +238,6 @@ const Market = () => {
     const cost = await marketMaker.calcNetCost(outcomeTokenAmounts);
     if (collateralAddr != ZERO_ADDRESS) {
       const collateralBalance = await collateral.balanceOf(account?.address!);
-      console.log(collateral);
-      console.log(collateralAddr);
       if (cost.gt(collateralBalance)) {
         await collateral.deposit(account?.address!, formatedAmount);
         await collateral.approve(
