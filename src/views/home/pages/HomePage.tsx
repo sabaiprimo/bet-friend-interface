@@ -219,17 +219,6 @@ const Market = () => {
   const buy = async () => {
     console.log("--------------------------buy---------------------");
     const formatedAmount = parseEther(selectedAmount);
-    const isApproved = await conditionalToken.isApprovedForAll(
-      account?.address ?? ZERO_ADDRESS,
-      marketInfo.lmsrAddress
-    );
-    if (!isApproved) {
-      await conditionalToken.setApprovalForAll(
-        marketInfo.lmsrAddress,
-        true,
-        account?.address ?? ZERO_ADDRESS
-      );
-    }
     // new BigNumber(selectedAmount).multipliedBy(
     //   new BigNumber(Math.pow(10, collateral.decimals)),
     // )
@@ -241,19 +230,20 @@ const Market = () => {
     );
 
     const cost = await marketMaker.calcNetCost(outcomeTokenAmounts);
+    if (collateralAddr != ZERO_ADDRESS) {
+      const collateralBalance = await collateral.balanceOf(account?.address!);
 
-    const collateralBalance = await collateral.balanceOf(account?.address!);
+      if (cost.gt(collateralBalance)) {
+        await collateral.deposit(account?.address!, formatedAmount);
+        await collateral.approve(
+          "0x6E6f31D4AAbF3497c0dEAA8ED0C4B09f57B14079",
+          formatedAmount
+        );
+      }
 
-    if (cost.gt(collateralBalance)) {
-      await collateral.deposit(account?.address!, formatedAmount);
-      await collateral.approve(
-        "0x6E6f31D4AAbF3497c0dEAA8ED0C4B09f57B14079",
-        formatedAmount
-      );
+      const tx = await marketMaker.trade(outcomeTokenAmounts, cost);
+      console.log({ tx });
     }
-
-    const tx = await marketMaker.trade(outcomeTokenAmounts, cost);
-    console.log({ tx });
 
     await getMarketInfo();
   };
@@ -278,10 +268,14 @@ const Market = () => {
       (v, i) =>
         i === selectedOutcomeToken ? formatedAmount.mul(-1) : BigNumber.from(0)
     );
-    const profit = (await marketMaker.calcNetCost(outcomeTokenAmounts)).mul(-1);
+    if (collateralAddr != ZERO_ADDRESS) {
+      const profit = (await marketMaker.calcNetCost(outcomeTokenAmounts)).mul(
+        -1
+      );
 
-    const tx = await marketMaker.trade(outcomeTokenAmounts, profit);
-    console.log({ tx });
+      const tx = await marketMaker.trade(outcomeTokenAmounts, profit);
+      console.log({ tx });
+    }
 
     await getMarketInfo();
   };
