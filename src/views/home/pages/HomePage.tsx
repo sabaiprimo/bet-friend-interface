@@ -239,10 +239,14 @@ const Market = () => {
     if (collateralAddr != ZERO_ADDRESS) {
       const collateralBalance = await collateral.balanceOf(account?.address!);
       if (cost.gt(collateralBalance)) {
-        await collateral.deposit(account?.address!, formatedAmount);
+        await collateral.deposit({
+          value: formatedAmount,
+          gasLimit: 500000,
+        });
         await collateral.approve(
           "0x6E6f31D4AAbF3497c0dEAA8ED0C4B09f57B14079",
-          formatedAmount
+          formatedAmount,
+          { gasLimit: 500000 }
         );
       }
 
