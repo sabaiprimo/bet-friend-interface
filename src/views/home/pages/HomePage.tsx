@@ -325,8 +325,8 @@ const Market = () => {
   const getMarketInfo = async () => {
     if (!process.env.NEXT_PUBLIC_ORACLE_ADDRESS) return false;
 
-    const collateral = await marketMaker.getCollateralToken();
-    setCollateralAddr(collateral);
+    const fetchCollateral = await marketMaker.getCollateralToken();
+    setCollateralAddr(fetchCollateral);
     const conditionId = getConditionId(
       process.env.NEXT_PUBLIC_ORACLE_ADDRESS,
       markets.markets[0].questionId,
@@ -354,7 +354,7 @@ const Market = () => {
         indexSet
       );
 
-      const positionId = await getPositionId(collateral, collectionId);
+      const positionId = await getPositionId(fetchCollateral, collectionId);
 
       const probability = await marketMaker.calcMarginalPrice(outcomeIndex);
 

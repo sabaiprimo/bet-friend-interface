@@ -6,6 +6,7 @@ import { formatBNToString } from "../utils";
 // import { CONDITIONAL_TOKEN_ADDRESS } from "constants/addresses/conditionalToken";
 import CollateralTokenABI from "../constants/abis/WETH9.json";
 import { BigNumber } from "ethers";
+import { ZERO_ADDRESS } from "constants/misc";
 
 export const useCollateralToken = (erc20Address: string) => {
   const provider = useProvider();
@@ -29,11 +30,13 @@ export const useCollateralToken = (erc20Address: string) => {
   };
 
   const deposit = async (addr: string, amount: BigNumber) => {
-    return writer.deposit({
-      value: amount,
-      from: addr,
-      gasLimit: 500000,
-    });
+    if (writer.address != ZERO_ADDRESS) {
+      return writer.deposit({
+        value: amount,
+        from: addr,
+        gasLimit: 500000,
+      });
+    }
   };
 
   const approve = async (addr: string, amount: BigNumber) => {
