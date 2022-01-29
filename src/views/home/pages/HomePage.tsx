@@ -232,7 +232,8 @@ const Market = () => {
     const cost = await marketMaker.calcNetCost(outcomeTokenAmounts);
     if (collateralAddr != ZERO_ADDRESS) {
       const collateralBalance = await collateral.balanceOf(account?.address!);
-
+      console.log(collateral);
+      console.log(collateralAddr);
       if (cost.gt(collateralBalance)) {
         await collateral.deposit(account?.address!, formatedAmount);
         await collateral.approve(
